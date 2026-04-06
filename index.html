@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oráculo Regreso al Origen - Conexión Cristal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --oro: #d4af37;
+            --oro-suave: #f7e7b4;
+            --cristal: #f8f9fa;
+        }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: radial-gradient(circle at center, #ffffff 0%, #f4f6f7 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+        h1, h2, h3, h4, .font-serif {
+            font-family: 'Cormorant Garamond', serif;
+        }
+        /* Contenedor de la carta con efecto de profundidad */
+        .card-container {
+            perspective: 2000px;
+            width: 320px;
+            height: 520px;
+            margin: 0 auto;
+        }
+        .card-inner {
+            transition: transform 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+        .card-inner.flipped {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            backface-visibility: hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 1.2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+        }
+        .card-front {
+            background: #fff;
+            z-index: 2;
+        }
+        .card-back {
+            background: #fff;
+            transform: rotateY(180deg);
+        }
+        /* Panel del Folleto - Estilo Minimalista de Lujo */
+        #folleto-panel {
+            transition: all 0.9s cubic-bezier(0.2, 1, 0.3, 1);
+            transform: translateY(100%);
+            visibility: hidden;
+        }
+        #folleto-panel.open {
+            transform: translateY(0);
+            visibility: visible;
+        }
+        .overlay {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            pointer-events: none;
+        }
+        .overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .gold-border {
+            border: 1px solid var(--oro);
+        }
+        .btn-magic {
+            background: linear-gradient(135deg, #d4af37 0%, #b38728 100%);
+            transition: all 0.4s ease;
+        }
+        .btn-magic:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(212, 175, 55, 0.5);
+        }
+        /* Animaciones */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .float-anim { animation: float 6s ease-in-out infinite; }
+        .scroll-custom::-webkit-scrollbar { width: 5px; }
+        .scroll-custom::-webkit-scrollbar-track { background: #f9f9f9; }
+        .scroll-custom::-webkit-scrollbar-thumb { background: var(--oro); border-radius: 10px; }
+    </style>
+</head>
+<body class="flex flex-col items-center py-10 px-4">
+
+    <!-- Cabecera de la Marca -->
+    <header class="text-center mb-8 opacity-0 transition-opacity duration-1000" id="header">
+        <h1 class="text-5xl md:text-6xl text-gray-800 italic mb-2">Oráculo Virtual</h1>
+        <p class="text-[10px] tracking-[0.6em] uppercase text-gray-400 font-semibold">Regreso al Origen • Conexión Cristal</p>
+        <div class="h-px w-20 bg-gold-200 mx-auto mt-6"></div>
+    </header>
+
+    <!-- Espacio Sagrado de la Carta -->
+    <div class="card-container float-anim mb-10">
+        <div id="card-inner" class="card-inner">
+            <!-- DORSO (CORREGIDO: Imagen original del mazo) -->
+            <div class="card-front">
+                <img src="Dorso Cartas Regreso al Origen.png" alt="Dorso Oráculo" 
+                     class="w-full h-full object-cover"
+                     onerror="this.src='https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=320&h=520&auto=format&fit=crop'">
+                <div class="absolute inset-0 bg-black/10 flex flex-col items-center justify-center p-8 text-center backdrop-blur-[1px]">
+                    <div class="w-16 h-16 border border-white/60 rounded-full flex items-center justify-center mb-6 backdrop-blur-md shadow-sm">
+                        <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+                    </div>
+                    <p class="text-white text-[9px] tracking-[0.5em] uppercase font-semibold leading-relaxed drop-shadow-sm">Sintoniza con tu respiración y toca para recibir</p>
+                </div>
+            </div>
+
+            <!-- FRENTE (Imagen de la carta revelada) -->
+            <div class="card-back">
+                <img id="img-frente" src="" alt="Llave del Origen" class="w-full h-full object-cover">
+            </div>
+        </div>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div class="flex flex-col items-center space-y-8">
+        <button id="btn-folleto" class="hidden opacity-0 btn-magic text-white px-10 py-4 rounded-full text-[11px] tracking-[0.3em] uppercase shadow-xl transition-all duration-700">
+            Abrir Folleto de Sabiduría
+        </button>
+        
+        <button id="btn-reset" class="text-[9px] uppercase tracking-[0.4em] text-gray-400 hover:text-gold-600 transition-colors duration-500 underline underline-offset-8 decoration-gold-200">
+            Volver a barajar las llaves
+        </button>
+    </div>
+
+    <!-- PANEL DEL FOLLETO (Basado en el PDF Oráculo del Origen) -->
+    <div id="folleto-panel" class="fixed inset-0 z-50 flex items-end justify-center pointer-events-none">
+        <div id="folleto-overlay" class="overlay absolute inset-0"></div>
+        
+        <div class="relative bg-white w-full max-w-2xl rounded-t-[4rem] shadow-[0_-20px_80px_rgba(0,0,0,0.15)] p-12 md:p-20 pointer-events-auto max-h-[92vh] overflow-y-auto scroll-custom">
+            <!-- Cerrar -->
+            <button id="btn-cerrar" class="absolute top-12 right-12 text-gray-300 hover:text-gold-600 transition">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <div class="text-center mb-16">
+                <span id="f-num" class="text-[10px] font-bold tracking-[0.6em] text-gold-600 uppercase mb-4 block"></span>
+                <h2 id="f-titulo" class="text-5xl md:text-6xl text-gray-800 italic"></h2>
+                <div class="h-px w-24 bg-gold-200 mx-auto mt-8"></div>
+            </div>
+
+            <div class="space-y-12">
+                <section>
+                    <h4 class="text-[11px] font-bold tracking-[0.3em] text-gold-600 uppercase mb-5">Mensaje del Origen</h4>
+                    <p id="f-mensaje" class="text-gray-600 leading-relaxed italic text-lg md:text-xl"></p>
+                </section>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-gray-50 p-8 rounded-[2.5rem] border-l-[6px] border-gray-200">
+                        <h4 class="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-3">La Sombra</h4>
+                        <p id="f-sombra" class="text-[13px] text-gray-500 leading-relaxed italic"></p>
+                    </div>
+                    <div class="bg-gray-50 p-8 rounded-[2.5rem] border-l-[6px] border-gold-400">
+                        <h4 class="text-[10px] font-bold tracking-widest text-gold-600 uppercase mb-3">La Integración</h4>
+                        <p id="f-integracion" class="text-[13px] text-gray-600 leading-relaxed"></p>
+                    </div>
+                </div>
+
+                <div class="text-center pt-14 border-t border-gray-100">
+                    <h4 class="text-[10px] font-bold tracking-[0.4em] text-gray-400 uppercase mb-6 italic">Pregunta para tu alma</h4>
+                    <p id="f-pregunta" class="text-3xl font-serif italic text-gray-800 px-4 leading-snug"></p>
+                </div>
+
+                <!-- Footer del Folleto -->
+                <div class="text-center pt-16 pb-4">
+                    <p class="text-[11px] text-gray-400 mb-8 italic italic tracking-widest">El Origen ya no es una idea: es experiencia encarnada.</p>
+                    <a href="https://conexioncristal.com" target="_blank" class="inline-block bg-black text-white px-14 py-5 rounded-full text-[11px] tracking-[0.4em] uppercase hover:bg-gold-700 transition-all duration-500 shadow-2xl">
+                        Adquirir el Ebook Completo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // BASE DE DATOS FINAL Y COMPLETA (Fiel al PDF 🌟 ORÁCULO DEL ORIGEN.pdf)
+        const oraculoData = [
+            { n: "1", t: "El Llamado", img: "1. el llamado-oraculo-regreso al origen.jpg", m: "Algo en tu interior despierta. No es una urgencia, es una memoria. El Llamado no exige respuestas inmediatas; solo pide que escuches. Tu alma recuerda el camino antes que tu mente.", s: "Ignorar el Llamado, distraerte, posponer lo que sabes que es verdadero para ti.", i: "Detente. Escucha. Reconoce lo que insiste suavemente en tu interior.", q: "¿Qué parte de mí está pidiendo ser escuchada ahora?" },
+            { n: "2", t: "La Presencia", img: "2 la presencia-oraculo-regreso al origen.jpg", m: "El Origen solo se recuerda en el ahora. Cuando estás presente, todo se ordena. No necesitas ir a ningún lugar: ya estás aquí.", s: "Vivir atrapado en el pasado o anticipando el futuro, desconectado del cuerpo.", i: "Respira conscientemente. Habita este instante sin querer cambiarlo.", q: "¿Dónde no estoy realmente presente en mi vida?" },
+            { n: "3", t: "El Cuerpo Sagrado", img: "3 el cuerpo sagrado-oraculo-regreso al origen-finas.jpg", m: "Tu cuerpo es un portal vivo. Cada sensación es información, cada síntoma un lenguaje que busca ser escuchado. Honrar tu cuerpo es honrar la vida que te habita.", s: "Desoír al cuerpo, exigirle, forzarlo o habitarlo solo desde la mente, olvidando su inteligencia natural.", i: "Escucha tu cuerpo. Siente la vida en tus células y habita tu piel con agradecimiento.", q: "¿Qué me dice mi cuerpo hoy si dejo de juzgarlo?" },
+            { n: "4", t: "La Emoción", img: "4 la emocion-oraculo-regreso al origen-finas.jpg", m: "La emoción es memoria en movimiento. No viene a desbordarte, sino a señalar algo que busca ser reconocido. Cuando es escuchada, deja de pesar y se vuelve guía.", s: "Reprimir, negar o quedar atrapado en la emoción, confundiéndola con tu identidad.", i: "Permite sentir sin juzgar. Respira dentro de la emoción y obsérvala con presencia.", q: "¿Qué mensaje me está dando hoy mi cuerpo?" },
+            { n: "5", t: "El Silencio", img: "5 el silencio-regreso al origen-finas.jpg", m: "En el silencio vivo habita la verdad. No es vacío, sino presencia plena. Cuando el ruido se aquieta, algo más profundo toma la voz.", s: "Temer al silencio y llenarlo de ruido externo o mental; evitar el encuentro contigo mismo.", i: "Crea espacios de quietud. Permanece sin buscar respuestas inmediatas. Deja que el silencio te habite.", q: "¿Qué aparece cuando dejo de hablarme?" },
+            { n: "6", t: "La Respiración", img: "6 la respiracion-oraculo-regreso al origen-finas.jpg", m: "Cada inhalación te acerca al Origen. La respiración es el puente constante entre lo visible y lo invisible. Siempre está contigo.", s: "Respirar de forma automática, superficial o desconectada, sin presencia ni escucha.", i: "Respira con intención. Permite que el aire te ordene desde adentro.", q: "¿Qué necesito soltar al exhalar?" },
+            { n: "7", t: "La Intención", img: "7 la intencion-oraculo-regreso al origen-finas.jpg", m: "Donde pones tu atención, pones tu energía. La intención clara es el motor que manifiesta tu regreso a la esencia original.", s: "Actuar de forma dispersa, sin propósito claro o movida por expectativas ajenas.", i: "Define tu dirección desde el corazón. Alinea tus acciones con tu verdad más profunda.", q: "¿Cuál es mi verdadera intención en este camino?" },
+            { n: "8", t: "Memoria Ancestral", img: "8 memoria ancestral-oraculo-regreso al origen-finas.jpg", m: "Eres el resultado de miles de historias. En tus células vive la sabiduría de quienes caminaron antes que tú. Reconócelos para liberarte.", s: "Cargar con lealtades invisibles o dolores heredados que no te pertenecen.", i: "Honra tu linaje pero reclama tu propio camino. Eres la evolución de tu historia.", q: "¿Qué memoria antigua estoy lista para integrar?" },
+            { n: "9", t: "La Herida", img: "9 la herida-oraculo-regreso al origen-finas.jpg", m: "La herida es el lugar por donde entra la luz. No es un error de tu historia, es el punto de mayor aprendizaje y transmutación.", s: "Identificarse con el papel de víctima o evitar mirar el dolor por miedo a ser destruida.", i: "Mira tu herida con ternura. Permite que sea la maestra que te enseña a amarte.", q: "¿Qué tesoro se esconde detrás de mi dolor?" },
+            { n: "10", t: "El Niño Interior", img: "10 el niño interior-oraculo-regreso al origen-finas.jpg", m: "Tu pureza original sigue intacta. Ese niño que sabe jugar, asombrarse y estar presente te espera para volver a casa.", s: "Exceso de seriedad, rigidez o descuido de las necesidades básicas emocionales.", i: "Juega. Date permiso para la curiosidad. Abraza a tu pequeña versión con infinito amor.", q: "¿Qué necesita hoy mi niña interna para sentirse a salvo?" },
+            { n: "11", t: "La Sombra", img: "11 sombrar-oraculo-regreso al origen-finas.jpg", m: "Lo que fue rechazado pide integración. La sombra no es oscuridad, es energía no amada que quedó fuera de la conciencia.", s: "Rechazo de partes de ti, juicio interno y miedo a ser descubierta.", i: "Mira aquello que evitas con compasión. Al integrarlo, recuperas tu fuerza.", q: "¿Qué parte de mí estoy evitando mirar?" },
+            { n: "12", t: "La Identidad", img: "12 la identidad-oraculo-regreso al origen-finas.jpg", m: "No eres las etiquetas que te pusieron. Eres la presencia que observa esas etiquetas. El regreso es desaprender quién creías ser.", s: "Aferrarse a roles, títulos o historias pasadas para sentirse seguro o valioso.", i: "Pregúntate: ¿Quién soy yo detrás de mi nombre e historia? Descansa en el no-saber.", q: "¿Quién soy cuando dejo de intentar ser alguien?" },
+            { n: "13", t: "El Perdón", img: "13 el perdon-oraculo-regreso al origen-finas.jpg", m: "El perdón es una liberación para quien lo otorga. Es soltar la carga de querer que el pasado sea distinto. Es abrir espacio a lo nuevo.", s: "Cargar con resentimiento, culpa o juicios que encadenan tu energía al pasado.", i: "Libera las deudas emocionales. Perdona por tu propia paz, reconociendo la humanidad.", q: "¿A quién o a qué necesito soltar hoy para ser libre?" },
+            { n: "14", t: "La Compasión", img: "14 la compación-oraculo-regreso al origen-finas.jpg", m: "La compasión integra todas las partes, incluso las que juzgaste. Mira, comprende y acompaña sin intentar cambiar nada.", s: "Dureza contigo o con otros, autoexigencia constante o juicio que cierra el corazón.", i: "Abraza tu proceso tal como es. Permítete caminar con paciencia y amor.", q: "¿Dónde puedo ser más amable conmigo?" },
+            { n: "15", t: "Maestro Interior", img: "15 el maestro interior - oraculo-regreso al origen-finas.jpg", m: "La verdad no se busca, se reconoce. Tienes una brújula infalible que sabe distinguir lo que es real para ti. Solo necesitas escucharla.", s: "Buscar respuestas afuera, desconfiando de tu saber interno o postergando tus decisiones.", i: "Confía en tu discernimiento. Aprende a escuchar sin interferencias.", q: "¿Qué me dice mi sabiduría interna ahora?" },
+            { n: "16", t: "La Coherencia", img: "16 la coherencia - oraculo-regreso al origen-finas.jpg", m: "Cuando pensamiento, emoción y acción se alinean, el Origen se expresa. La coherencia es vivir de acuerdo a lo que sientes.", s: "Decir una cosa, sentir otra y actuar de manera distinta, generando desgaste o desconexión.", i: "Ajusta suavemente lo que no está alineado. Pequeños cambios fortalecen la claridad.", q: "¿Qué acción de hoy me haría sentir en coherencia?" },
+            { n: "17", t: "La Confianza", img: "17 la confianza - oraculo-regreso al origen-finas.jpg", m: "Confiar es descansar en la vida. Es una apertura consciente a lo que se despliega cuando dejas de resistir.", s: "Control excesivo, desconfianza constante, miedo a soltar o al fluir natural.", i: "Suelta un poco más. Relaja la exigencia y observa qué sucede cuando no fuerzas.", q: "¿Dónde me cuesta confiar?" },
+            { n: "18", t: "La Entrega", img: "18 la entrega - oraculo-regreso al origen-finas.jpg", m: "Entregarse no es rendirse, es unirse a la voluntad mayor. Es soltar el 'cómo' para permitir que lo sagrado actúe a través de ti.", s: "Resistencia al cambio, lucha contra la realidad o apego a los resultados.", i: "Ofrece tu camino. Pon tus dones al servicio de algo más grande que tu personaje.", q: "¿Qué pasaría si hoy dejara de luchar?" },
+            { n: "19", t: "La Unidad", img: "19 la unidad - oraculo-regreso al origen-finas.jpg", m: "Nunca estuviste separada. Todo pertenece. La sensación de aislamiento es una experiencia de la mente, no una verdad esencial.", s: "Sentimiento de aislamiento o división; creer que debes defenderte del mundo.", i: "Reconoce el vínculo con todo lo que es. Observa cómo cada encuentro te refleja.", q: "¿Dónde olvido que formo parte del todo?" },
+            { n: "20", t: "El Origen", img: "20 el origen-regreso al origen-finas.jpg", m: "La Fuente vive en ti. No hay distancia. Aquello que buscas como sentido o pertenencia nunca estuvo fuera: siempre fue el punto desde donde miras.", s: "Buscar afuera lo que ya eres; confundir el camino con la meta y olvidar el punto de partida interno.", i: "Descansa en lo esencial. Vuelve al centro silencioso que te habita sin esfuerzo.", q: "¿Qué cambia cuando recuerdo quién soy?" },
+            { n: "21", t: "La Integración", img: "21 integracion-regreso al origen-finas.jpg", m: "El recuerdo se encarna. El camino continúa desde otro lugar. Integrar es permitir que lo vivido transforme la forma en que caminas la vida.", s: "Quedarse solo en lo espiritual sin llevarlo a la vida; comprender sin aplicar.", i: "Vive lo recordado en lo cotidiano. Permite que tus elecciones reflejen lo reconocido.", q: "¿Cómo puedo encarnar este recuerdo hoy?" }
+        ];
+
+        let selectedKey = null;
+        const inner = document.getElementById('card-inner');
+        const imgFrente = document.getElementById('img-frente');
+        const btnFolleto = document.getElementById('btn-folleto');
+        const panel = document.getElementById('folleto-panel');
+        const overlay = document.getElementById('folleto-overlay');
+        const header = document.getElementById('header');
+
+        window.onload = () => header.style.opacity = '1';
+
+        function revelar() {
+            if (inner.classList.contains('flipped')) return;
+            selectedKey = oraculoData[Math.floor(Math.random() * oraculoData.length)];
+            imgFrente.src = selectedKey.img;
+            inner.classList.add('flipped');
+            setTimeout(() => {
+                btnFolleto.classList.remove('hidden');
+                setTimeout(() => btnFolleto.style.opacity = '1', 100);
+            }, 1400);
+        }
+
+        function abrirFolleto() {
+            document.getElementById('f-num').innerText = `Llave ${selectedKey.n}`;
+            document.getElementById('f-titulo').innerText = selectedKey.t;
+            document.getElementById('f-mensaje').innerText = selectedKey.m;
+            document.getElementById('f-sombra').innerText = selectedKey.s;
+            document.getElementById('f-integracion').innerText = selectedKey.i;
+            document.getElementById('f-pregunta').innerText = selectedKey.q;
+            panel.classList.add('open');
+            overlay.classList.add('active');
+        }
+
+        function cerrar() {
+            panel.classList.remove('open');
+            overlay.classList.remove('active');
+        }
+
+        inner.addEventListener('click', revelar);
+        btnFolleto.addEventListener('click', abrirFolleto);
+        document.getElementById('btn-cerrar').addEventListener('click', cerrar);
+        overlay.addEventListener('click', cerrar);
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            inner.classList.remove('flipped');
+            btnFolleto.style.opacity = '0';
+            setTimeout(() => btnFolleto.classList.add('hidden'), 500);
+            cerrar();
+        });
+    </script>
+</body>
+</html>
